@@ -26,7 +26,6 @@ class MqttClient:
 
 
 	def _on_message(self, client, userdata, message):
-		print("message")
 		handler = self.message_handlers.get(message.topic)
 		if handler is not None:
 			handler(client, message)

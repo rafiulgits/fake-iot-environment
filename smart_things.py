@@ -56,14 +56,14 @@ class SmartAC(SmartThing):
 		SmartThing.__init__(self, mqttClient, currentStatus, readingInterval)
 
 
-	def on_command_execute_request(self, client, userdata, message):
+	def on_command_execute_request(self, client, message):
 		command = loads(message.payload)
 		status = command.get('status')
 		value = command.get('value')
 		if status is not None and (status == 'ON' or status == 'OFF'):
-			self.currentSatus['status'] = status
+			self.currentStatus['status'] = status
 			
-		if value is not None and ( value > 14 or value < 35):
+		if value is not None:
 			self.currentStatus['value'] = value
 
 		self.publish_status(self.currentStatus)

@@ -38,7 +38,7 @@ class HomeAutomationSystem(BaseSystem):
 
 
 	def setup_living_room_ac(self):
-		smartAc = SmartAC(self.mqttClient, {'status': 'OFF', 'value' : 0}, 8)
+		smartAc = SmartAC(self.mqttClient, {'status': 'ON', 'value' : 19}, 7)
 		smartAc.set_incomming_command_topic("home/living-room/ac/status/change")
 		smartAc.set_status_publishing_topic("home/living-room/ac/status")
 		self.devices.append(smartAc)

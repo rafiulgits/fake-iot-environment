@@ -1,6 +1,7 @@
 from settings import *
 from paho.mqtt import client as mqtt
-from sensors import DHT22Sensor
+from sensors import DHT22Sensor, LM393Sensor
+from smart_things import SmartLight
 
 
 class MqttClient:
@@ -22,23 +23,58 @@ class MqttClient:
 		
 
 	def on_subscribe(self, client, userdata, mid, granted_qos):
-		print(mid)
-		print(userdata)
-		print(granted_qos)
+		pass
 
 
 	def on_message(self, client, userdata, message):
-		print(message)
-		print(userdata)
+		print(message.payload)
 
 
 	def on_disconnect(self, client, userdata, rc):
 		print("diconnect")
 
 
+
 	def start(self):
-		self.client.connect(MQTT_BROKER_HOST,MQTT_BROKER_PORT, 3)
-		dht22_sensor = DHT22Sensor(self.client, "home/temperature-humidity", 10)
-		dht22_sensor.start()
-		self.client.loop_start()
-		dht22_sensor.join()
+		self.client.connect(MQTT_BROKER_HOST,MQTT_BROKER_PORT)
+		self.client.subscribe("home/#")
+		self.init_sensors()
+		self.start_sensors()
+
+		#
+		#
+		# TODO: common on_message listener for all subscriptions
+		#
+		#
+
+		# smart light
+		smartLight = SmartLight(self.client, {'status' : 'ON'}, 10)
+		smartLight.set_incomming_command_topic("home/light/status/change")
+		smartLight.set_status_publishing_topic("home/light/status")
+		smartLight.daemon = True
+		smartLight.start()
+
+		try:
+			self.client.loop_forever()
+		except KeyboardInterrupt:
+			pass
+		self.join_sensors()
+		smartLight.join()
+
+
+	def init_sensors(self):
+		self.sensors = [
+			DHT22Sensor(self.client, "home/temperature-humidity", 8),
+			LM393Sensor(self.client, "vehicle/car/velocity", 10, 10)
+		]
+
+
+	def start_sensors(self):
+		for sensor in self.sensors:
+			sensor.daemon = True
+			sensor.start()
+
+
+	def join_sensors(self):
+		for sensor in self.sensors:
+			sensor.join()

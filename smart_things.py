@@ -1,10 +1,11 @@
 from threading import Thread, Timer
+from client import MqttClient
 from json import dumps, loads
 
 
 class SmartThing(Thread):
 
-	def __init__(self, mqttClient, currentStatus, readingInterval):
+	def __init__(self, mqttClient:MqttClient, currentStatus:dict, readingInterval:int):
 		Thread.__init__(self)
 		self.mqttClient = mqttClient
 		self.currentStatus = currentStatus
@@ -13,6 +14,7 @@ class SmartThing(Thread):
 
 	def set_incomming_command_topic(self, topic):
 		self.incoming_command_topic = topic
+		self.mqttClient.add_message_handler(topic, self.on_command_execute_request)
 
 
 	def set_status_publishing_topic(self, topic):
@@ -26,10 +28,9 @@ class SmartThing(Thread):
 
 	def setup_mqttClient(self):
 		self.mqttClient.subscribe(self.incoming_command_topic)
-		self.mqttClient.on_message = self.on_command_execute_request
 
 
-	def on_command_execute_request(self, client, userdata, message):
+	def on_command_execute_request(self, client, message):
 		pass
 
 
@@ -51,13 +52,11 @@ class SmartAC(SmartThing):
 	}
 	"""
 	
-	def __init__(self, mqttClient, currentStatus, readingInterval):
+	def __init__(self, mqttClient:MqttClient, currentStatus:dict, readingInterval:int):
 		SmartThing.__init__(self, mqttClient, currentStatus, readingInterval)
 
 
 	def on_command_execute_request(self, client, userdata, message):
-		if message.topic != self.incoming_command_topic:
-			return
 		command = loads(message.payload)
 		status = command.get('status')
 		value = command.get('value')
@@ -78,13 +77,11 @@ class SmartLight(SmartThing):
 		'status' : 'ON'
 	}
 	"""
-	def __init__(self, mqttClient, currentStatus, readingInterval):
+	def __init__(self, mqttClient:MqttClient, currentStatus:dict, readingInterval:int):
 		SmartThing.__init__(self, mqttClient, currentStatus, readingInterval)
 
 
-	def on_command_execute_request(self, client, userdata, message):
-		if message.topic != self.incoming_command_topic:
-			return
+	def on_command_execute_request(self, client, message):
 		command = loads(message.payload)
 		status = command.get('status')
 		if status is not None and (status == 'ON' or status == 'OFF'):

@@ -59,12 +59,12 @@ class SmartAC(SmartThing):
 	def on_command_execute_request(self, client, message):
 		command = loads(message.payload)
 		status = command.get('status')
-		value = command.get('value')
+		# value = command.get('value')
 		if status is not None and (status == 'ON' or status == 'OFF'):
 			self.currentStatus['status'] = status
 			
-		if value is not None:
-			self.currentStatus['value'] = value
+		# if value is not None:
+		# 	self.currentStatus['value'] = value
 
 		self.publish_status(self.currentStatus)
 

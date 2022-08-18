@@ -42,6 +42,7 @@ class MqttClient:
 
 
 	def subscribe(self, topic):
+		print("Subscribe: ", topic)
 		self.client.subscribe(topic)
 
 

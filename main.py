@@ -15,7 +15,7 @@ class FakeSystems:
 		devices = []
 		for system in self.systems:
 			devices = devices + system.get_devices()
-		return devices;
+		return devices
 
 
 def main():

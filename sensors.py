@@ -41,11 +41,11 @@ class DHT22Sensor(BaseSensor):
 
 
 	def read_temperature(self):
-		return randint(25, 35)+random()
+		return randint(26, 35)
 	
 
 	def read_humidity(self):
-		return randint(30, 90)
+		return randint(80, 90)
 
 
 	def read(self):
